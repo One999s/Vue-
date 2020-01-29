@@ -1,0 +1,4 @@
+{
+    "semi":false, //代码结束的分号
+    "singleQuote":true //单引号
+}
