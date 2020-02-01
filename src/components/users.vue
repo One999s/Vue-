@@ -4,6 +4,7 @@
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item>用户管理</el-breadcrumb-item>
             <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+            
           </el-breadcrumb>
           <el-card class="box-card">
             <el-row :gutter="20" class="el-row">
@@ -101,7 +102,7 @@
               </el-form>
             </div>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button @click="cancelAdd">取 消</el-button>
               <el-button type="primary" @click="addButton(addUser)">提 交</el-button>
             </span>
           </el-dialog>
@@ -113,7 +114,7 @@
             :before-close="handleClose"
             @close="editDialogClose">
             <div class="adduserClass">
-              <el-form ref="editUserForm" :model="editUser" label-width="80px">
+              <el-form ref="editUserForm" :model="editUser" label-width="80px" :rules="addrules">
                 <el-form-item label="用户ID :" prop="id">   
                   <el-input v-model="editUser.id" style="width: 80%;" prefix-icon='el-icon-user' disabled v-focus></el-input>
                 </el-form-item>
@@ -126,7 +127,7 @@
               </el-form>
             </div>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="dialogVisibleEdit = false">取 消</el-button>
+              <el-button @click="cancelEdit">取 消</el-button>
               <el-button type="primary" @click="getEdit">提交</el-button>
             </span>
           </el-dialog>
@@ -148,7 +149,7 @@ export default{
           return callback()
         }
         callback(new Error('请输入正确的手机号'))
-      };
+      }
       return {
           usersInfo:{
             query:'',
@@ -161,14 +162,14 @@ export default{
           total:0,
           dialogVisible: false,
           dialogVisibleEdit:false,
-          addUser: {
-                username: '',
-                password: '',
+          addUser:{
+                username:'',
+                password:'',
                 email:'',
                 mobile:''
             },
-            editUser:{
-                username: '',
+          editUser:{
+                username:'',
                 email:'',
                 mobile:''
             },
@@ -213,6 +214,21 @@ export default{
         this.usersInfo.pagenum = val
         this.getUserList()
       },
+      //用了之后 v-model获取不到值,先注释了
+      addDialogClose(){ 
+        // this.$refs.addUserForm.resetFields()
+      },
+      editDialogClose(){
+         //this.$refs.editUserForm.resetFields()
+      },
+      cancelEdit(){
+        this.dialogVisibleEdit = false
+        this.$refs.editUserForm.resetFields()
+      },
+      cancelAdd(){
+        this.dialogVisible = false
+        this.$refs.addUserForm.resetFields()
+      },
      async switchChange(val){
         const {data:res}=await this.$http.put(`users/${val.id}/state/${val.mg_state}`)
         if(res.meta.status!==200){
@@ -232,7 +248,6 @@ export default{
         console.log(this.addUser);
         this.$refs.addUserForm.validate(async (valid) => {
           if (valid) {
-            console.log(this.addUser);
             this.dialogVisible = false
             const {data:res} = await this.$http.post('users',this.addUser)
             console.log(res);
@@ -271,19 +286,20 @@ export default{
           this.editUser.email = val.email
           this.editUser.mobile = val.mobile
       },
-      getEdit:async function(){
-        this.dialogVisibleEdit = false
-        console.log(this.editUser.id);
-        const {data:res} = await this.$http.put(`users/${this.editUser.id}`,this.editUser)
-        if(res.meta.status!==200){return this.$message.error(res.meta.msg)}
-        this.$message.success(res.meta.msg)
-        this.getUserList()
-      },
-      addDialogClose(){
-        this.$refs.addUserForm.resetFields()
-      },
-      editDialogClose(){
-        this.$refs.editUserForm.resetFields()
+      getEdit:function(){
+        this.$refs.editUserForm.validate(async (valid) => {
+          if (valid) {
+            this.dialogVisibleEdit = false
+            console.log(this.editUser.id);
+            const {data:res} = await this.$http.put(`users/${this.editUser.id}`,this.editUser)
+            if(res.meta.status!==200){return this.$message.error(res.meta.msg)}
+            this.$message.success(res.meta.msg)
+            this.getUserList()
+          } else {
+            this.$message.error('请正确填写资料')
+            return false;
+          }
+        })
       },
       async assUser(data){
         //  const {data:res} =await this.$http.put(`users/${data.id}/role`)
