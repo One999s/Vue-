@@ -9,7 +9,7 @@
           <el-card class="box-card">
             <el-row :gutter="20" class="el-row">
                 <el-col :span="6">
-                    <el-input placeholder="请输入内容" v-model='usersInfo.query' class="input-with-select" clearable @clear="getUserList"> 
+                    <el-input placeholder="请输入用户姓名" v-model='usersInfo.query' class="input-with-select" clearable @clear="getUserList"> 
                         <el-button slot="append" icon="el-icon-search" @click='getUserList'></el-button>
                     </el-input>
                 </el-col>
