@@ -51,6 +51,23 @@
           <el-button type="primary" @click="editRoles(editRolesForm.id)">提 交</el-button>
         </span>
       </el-dialog>
+      <!-- 分配权限 -->
+      <el-dialog title="分配权限" :visible.sync="dialogVisible2" width="50%" @close="resetKey">
+        <el-tree
+          :data="dataTree"
+          show-checkbox
+          default-expand-all
+          node-key="id"
+          :default-checked-keys="treeCheckedKey"
+          ref="tree"
+          highlight-current
+          :props="defaultProps">
+        </el-tree>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible2 = false">取 消</el-button>
+          <el-button type="primary" @click="cancelPower()">提 交</el-button>
+        </span>
+      </el-dialog>
 
       <el-table :data="rolesList" border style="width: 100%">
         <el-table-column type="expand">
@@ -58,18 +75,18 @@
             <el-row :gutter="20" v-for="(item,index) in scope.row.children" :key="item.id"
               :class="['borderBottom',index==0 ? 'borderTop' : '']">
               <el-col :span="6">
-                <el-tag closable>{{item.authName}}</el-tag> <i class="el-icon-caret-right"></i>
+                <el-tag closable @close="removePower(scope.row,item)">{{item.authName}}</el-tag> <i class="el-icon-caret-right"></i>
               </el-col>
               <el-col :span="18">
                 <el-row v-for="(item1) in item.children" :key="item1.id"
                   :class="['borderBottom',index==0 ? 'borderTop' : '']">
                   <el-col :span="12">
-                    <el-tag closable>{{item1.authName}}</el-tag>
+                    <el-tag closable @close="removePower(scope.row,item1)">{{item1.authName}}</el-tag> <i class="el-icon-caret-right"></i>
                   </el-col>
                   <el-col :span="12">
                     <el-row v-for="(item2) in item1.children" :key="item2.id">
                       <el-col :span="24">
-                        <el-tag closable>{{item2.authName}}</el-tag>
+                        <el-tag :disable-transitions="false" closable @close="removePower(scope.row,item2)">{{item2.authName}}</el-tag>
                       </el-col>
                     </el-row>
                   </el-col>
@@ -90,7 +107,7 @@
             <div>
               <el-button type="primary" icon="el-icon-edit" @click="editDialog(data.row)">编辑</el-button>
               <el-button type="success" icon="el-icon-delete" @click=deleteRoles(data.row.id)>删除</el-button>
-              <el-button type="warning" icon="el-icon-setting">分配</el-button>
+              <el-button type="warning" icon="el-icon-setting" @click='cancelPowerDialog(data.row)'>分配</el-button>
             </div>
           </template>
         </el-table-column>
@@ -129,10 +146,18 @@
         },
         dialogVisible: false,
         dialogVisible1: false,
+        dialogVisible2:false,
         editRolesForm: {
           id: '',
           roleName: '',
           roleDesc: ''
+        },
+        dataTree:[],
+        roleId:'',
+        treeCheckedKey:[],
+        defaultProps:{
+          children: 'children',
+          label: 'authName'
         }
       }
     },
@@ -205,6 +230,59 @@
             message: '已取消删除'
           });
         });
+      },
+      removePower(data,idata){
+         this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const {data:res} = await this.$http.delete(`roles/${data.id}/rights/${idata.id}`)
+          if(res.meta.status!==200){
+            return this.$message.error(res.meta.msg)
+          }
+          this.$message.success(res.meta.msg)
+          data.children = res.data
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      async cancelPowerDialog(ck){
+        this.dialogVisible2 = true
+        const {data:res} = await this.$http.get('rights/tree')
+        this.dataTree = res.data
+        this.getPowerKey(ck,this.treeCheckedKey)
+        this.roleId = ck.id
+        console.log(res);
+      },
+      async cancelPower(){
+        const keys = [
+          ...this.$refs.tree.getCheckedKeys(),
+          ...this.$refs.tree.getHalfCheckedKeys()
+      ]
+        const keyStr = keys.join(',')
+        const {data:res} =await this.$http.post(`roles/${this.roleId}/rights`,{rids:keyStr})
+        if(res.meta.status!==200){
+          return this.$message.error(res.meta.msg)
+        }
+        this.$message.success(res.meta.msg)
+        this.dialogVisible2 = false
+        this.getRolesList()
+      },
+      //递归
+      getPowerKey(node,arr){
+        if(!node.children){
+          return arr.push(node.id)
+        }
+        node.children.forEach(item =>
+          this.getPowerKey(item,arr)
+        )
+      },
+      resetKey(){
+        this.treeCheckedKey =[];
       }
     }
   }
@@ -218,7 +296,10 @@
   .el-tag {
     margin: 5px 0;
   }
-
+  .el-row{
+    display: flex;
+    align-items: center;
+  }
   .borderTop {
     border-top: 1px solid #eee;
   }

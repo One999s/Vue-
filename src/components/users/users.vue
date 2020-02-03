@@ -63,7 +63,7 @@
                     <el-button type="danger" icon="el-icon-delete" size="mini" @click="userDelete(data.row)"></el-button>
                   </el-tooltip>
                   <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable='false'>
-                    <el-button type="warning" icon="el-icon-setting" size="mini" @click="assUser(data.row)"></el-button>
+                    <el-button type="warning" icon="el-icon-setting" size="mini" @click="cancelRoleDialog(data.row)"></el-button>
                   </el-tooltip>
                 </template>
               </el-table-column>
@@ -131,6 +131,32 @@
               <el-button type="primary" @click="getEdit">提交</el-button>
             </span>
           </el-dialog>
+          <!--分配角色-->
+          <el-dialog
+            title="分配角色"
+            :visible.sync="dialogVisibleRole"
+            width="30%"
+            @close="cancelReset">
+            <div class="adduserClass">
+              <el-form ref="rolesForm" :model="rolesForm" label-width="80px">
+                <el-form-item label="用户名 :" prop="username">   
+                  <el-input v-model="rolesForm.username" style="width: 66%;" prefix-icon='el-icon-user' disabled v-focus></el-input>
+                </el-form-item>
+                <el-form-item label="当前角色:">   
+                  <el-input v-model="rolename" style="width: 66%;" prefix-icon='el-icon-user' disabled></el-input>
+                </el-form-item>
+                <el-form-item label="分配角色 :" prop="rid">
+                  <el-select v-model="rolesForm.rid" placeholder="请分配用户角色">
+                    <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisibleRole=false">取 消</el-button>
+              <el-button type="primary" @click="cancelRole">提交</el-button>
+            </span>
+          </el-dialog>
     </div>
 </template>
 
@@ -162,6 +188,7 @@ export default{
           total:0,
           dialogVisible: false,
           dialogVisibleEdit:false,
+          dialogVisibleRole:false,
           addUser:{
                 username:'',
                 password:'',
@@ -173,6 +200,14 @@ export default{
                 email:'',
                 mobile:''
             },
+            rolesForm:{
+              username:'',
+              rid:'',
+              rname:''
+            },
+            userId:'',
+            rolename:'',
+            rolesList:[],
             addrules: {
                 username: [
                     { required: true, message: '请输入账号', trigger: 'blur' },
@@ -301,9 +336,28 @@ export default{
           }
         })
       },
-      async assUser(data){
-        //  const {data:res} =await this.$http.put(`users/${data.id}/role`)
+      async cancelRoleDialog(data){
+        this.dialogVisibleRole = true
+        this.rolesForm.username = data.username
+        const {data:res} =await this.$http.get('roles')
+        this.rolesList = res.data
+        this.userId = data.id
+        this.rolename = data.role_name
+        console.log(this.rolesList);
         console.log(data);
+      },
+      async cancelRole(){
+        const {data:res} = await this.$http.put(`users/${this.userId}/role`,{rid:this.rolesForm.rid})
+        if(res.meta.status!==200){
+          return this.$message.error(res.meta.msg)
+        }
+        this.$message.success(res.meta.msg)
+        this.dialogVisibleRole = false
+        this.getUserList()
+        console.log(res);
+      },
+      cancelReset(){
+        this.$refs.rolesForm.resetFields()
       }
   },
   directives:{
