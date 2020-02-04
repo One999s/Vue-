@@ -289,10 +289,6 @@
 
 </script>
 <style lang="less" scoped>
-  .el-card {
-    margin-top: 20px;
-  }
-
   .el-tag {
     margin: 5px 0;
   }

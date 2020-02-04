@@ -9,8 +9,11 @@ Vue.prototype.$http = axios
 import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
+import Treetable from 'vue-table-with-tree-grid'
 Vue.config.productionTip = false
 new Vue({
   router,
   render: h => h(App)
 }).$mount('#app')
+
+Vue.component('tree-table', Treetable)
