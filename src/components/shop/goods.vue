@@ -25,7 +25,7 @@
           <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteCate(scope.row)">删除</el-button>
          </div>
        </template>
-        </tree-table>
+        </tree-table> 
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
