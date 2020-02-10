@@ -11,6 +11,7 @@ import Params from '../components/shop/params.vue'
 import Categories from '../components/shop/categories.vue'
 import Orders from '../components/order/orders.vue'
 import Reports from '../components/report/reports.vue'
+import addGoods from '../components/shop/addGoods.vue'
 import '../assets/css/global.css'
 import '../plugins/element.js'
 
@@ -43,7 +44,8 @@ const router = new VueRouter({
         {path:'/params',component:Params},
         {path:'/categories',component:Categories},
         {path:'/orders',component:Orders},
-        {path:'/reports',component:Reports}
+        {path:'/reports',component:Reports},
+        {path:'/goods/add',component:addGoods}
       ]
     }
   ]
