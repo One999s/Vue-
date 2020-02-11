@@ -35,8 +35,10 @@
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template>
-            <el-button type="primary" icon="el-icon-edit" @click="editDialog"></el-button>
-            <el-button type="primary" icon="el-icon-setting" @click="dialogVisiblewuliu=true"></el-button>
+            <div>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editDialog">编辑</el-button>
+              <el-button type="success" icon="el-icon-setting" size="mini" @click="dialogVisiblewuliu=true">物流</el-button>
+          </div>
           </template>
         </el-table-column>
       </el-table>

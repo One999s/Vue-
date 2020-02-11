@@ -1,17 +1,24 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '../components/login.vue'
-import Home from '../components/home.vue'
-import Welcome from '../components/welcome.vue'
-import Users from '../components/users/users.vue'
-import Roles from '../components/power/roles.vue'
-import Rights from '../components/power/rights.vue'
-import Goods from '../components/shop/goods.vue'
-import Params from '../components/shop/params.vue'
-import Categories from '../components/shop/categories.vue'
-import Orders from '../components/order/orders.vue'
-import Reports from '../components/report/reports.vue'
-import addGoods from '../components/shop/addGoods.vue'
+
+const Login = () => import(/* webpackChunkName: "login_home_welcome" */ '../components/login.vue')
+const Home = () => import(/* webpackChunkName: "login_home_welcome" */ '../components/home.vue')
+const Welcome = () => import(/* webpackChunkName: "login_home_welcome" */ '../components/welcome.vue')
+const Users = () => import(/* webpackChunkName: "users_roles_rights" */ '../components/users/users.vue')
+const Roles = () => import(/* webpackChunkName: "users_roles_rights" */ '../components/power/roles.vue')
+const Rights = () => import(/* webpackChunkName: "users_roles_rights" */ '../components/power/rights.vue')
+
+const Params = () => import(/* webpackChunkName: "params_cate" */ '../components/shop/params.vue')
+const Categories = () => import(/* webpackChunkName: "params_cate" */ '../components/shop/categories.vue')
+
+const Goods = () => import(/* webpackChunkName: "goods_add" */ '../components/shop/goods.vue')
+const addGoods = () => import(/* webpackChunkName: "goods_add" */ '../components/shop/addGoods.vue')
+
+const Orders = () => import(/* webpackChunkName: "orders_reports" */ '../components/order/orders.vue')
+const Reports = () => import(/* webpackChunkName: "orders_reports" */ '../components/report/reports.vue')
+
+
+
 import '../assets/css/global.css'
 import '../plugins/element.js'
 
@@ -53,7 +60,7 @@ const router = new VueRouter({
 router.beforeEach((to,form,next)=>{
   if(to.path==='/login') return next();
   const tokenStr = window.sessionStorage.getItem('token');
-  if(!tokenStr){next('/login');Element.Message.error('非法访问，请登录后再试');}
+  if(!tokenStr){next('/login');Element.Message.error('请登录');}
   else{next()}
 })
 export default router
